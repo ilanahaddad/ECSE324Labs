@@ -23,8 +23,19 @@ LOOPADD:	ADD R3, R3, R5			//add next element of the list to the sum, that is sto
 			
 			
 AVERAGE: 	MOV R1, #0				// store 0 in R1, this will hold the value of our average
-									//shift right by N bits = division by 2^N
-			ASR R1, R3, #2			//divide R3 (sum) by 2^N (4) and store in R6
+									
+			LDR R12, =RESULT		//R12 points to the result location
+			LDR R2, [R12, #4]		//R2 holds the number of elements in the list
+			MOV R11, #0 			//R11 will be our counter for the amount of LSR we do 
+LOOP:		ADD R11, R11, #1		//increment counter
+			LSR R2, R2, #1			// 1000 --> 0100
+			CMP R2, #1				//keep shifting until R2 is equal to 1
+			BEQ DONE				//if R2 is one, we are done
+			B LOOP					// branch back to loop until R2 is 1
+
+DONE:		LSR R1, R3, R11			// R3 (sum) / 2^R11 
+//shift right by N bits = division by 2^N
+//			ASR R1, R3, #2			//divide R3 (sum) by 2^N (4) and store in R6
 			
 //RETRIEVE ORIGINAL VALUES AND LOAD THEM TO RESPECTIVE REGISTERS:
 			LDR R2, [R12, #4]		//R2 holds the number of elements in the list
