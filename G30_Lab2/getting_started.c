@@ -1,16 +1,29 @@
+#define SIZE_OF_ARRAY(X) (sizeof(X)/sizeof(X[0]))
+// gets length of the array in C, stores in register 
 
-
-/* This program demonstrates the use of parallel ports in the DE1-SoC Computer
- * It performs the following: 
- * 	1. displays the SW switch values on the red lights LEDR
- * 	2. displays a rotating pattern on the HEX displays
- * 	3. if a KEY[3..0] is pressed, uses the SW switches as the pattern
-*/
-extern int MAX_2(int x, int y);
-int main(){
-	int a,b,c;
-	a = 1;
-	b = 2;
-	c = MAX_2(a,b);
-	return c;
+int maxVal(int array[], int n) {
+	int a, b, temp; 
+	for(a=0;a<n-1;a++) 
+	{
+		for(b=a;b<n;b++) 
+		{
+			if(array[a]>array[b])
+			{
+				temp = array[b];
+				array[b] = array[a];
+				array[a] = temp;
+			}
+		}
+	}
+	int last = n;
+	return array[last-1];
 }
+
+int main() {
+	int a[5] = {1,20,3,4,5};
+	int size = SIZE_OF_ARRAY(a);
+	int max_val = maxVal(a,size);
+	return max_val; // returns the value to register R4 because first 3 values are used in the stack 
+}
+
+
