@@ -1,29 +1,18 @@
 #define SIZE_OF_ARRAY(X) (sizeof(X)/sizeof(X[0]))
-// gets length of the array in C, stores in register 
-
-int maxVal(int array[], int n) {
-	int a, b, temp; 
-	for(a=0;a<n-1;a++) 
-	{
-		for(b=a;b<n;b++) 
-		{
-			if(array[a]>array[b])
-			{
-				temp = array[b];
-				array[b] = array[a];
-				array[a] = temp;
-			}
-		}
-	}
-	int last = n;
-	return array[last-1];
-}
+// gets length of the array in C, stores in register. size of array is number of bytes divided by 4 bytes = # of elements in array
 
 int main() {
 	int a[5] = {1,20,3,4,5};
 	int size = SIZE_OF_ARRAY(a);
-	int max_val = maxVal(a,size);
-	return max_val; // returns the value to register R4 because first 3 values are used in the stack 
+	int i;
+	int max =0;
+	for(i=0; i<size;i++){
+		if(a[i]>max){
+			max = a[i];
+		}
+	}
+	//int max_val = maxVal(a,size);
+	return max; // returns the value to register R4 because first 3 values are used in the stack 
 }
 
 
