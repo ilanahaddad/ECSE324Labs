@@ -10,5 +10,7 @@ read_LEDs_ASM:
 
 write_LEDs_ASM:
 	LDR R1, =LED_BASE		//load LED memory location
-	STR R1, [R0]			//store value into R0
+	STR R0, [R1]			//store value into R0
 	BX LR
+
+	.end
