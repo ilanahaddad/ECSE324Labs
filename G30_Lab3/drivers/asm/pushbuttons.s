@@ -1,5 +1,5 @@
 		.text
-		.equ	PB_DATA, 0xFF200050
+		.equ	PB_DATA, 0xFF200050 //these registers provide the values of the switches KEY 3-0
 		.equ	PB_EDGECAP, 0xFF200058
 		.equ	PB_INT,	0xFF20005C	
 		.global	read_PB_data_ASM
@@ -9,21 +9,22 @@
 		.global PB_clear_edgecap_ASM
 		.global enable_PB_INT_ASM
 		.global disable_PB_INT_ASM
-
+/*These subroutines only access the pushbutton data register */
 read_PB_data_ASM:
-			LDR R0, =PB_DATA	
+			LDR R0, =PB_DATA	    //read data and load it in R0
 			LDR R0, [R0]		
 			BX LR
 
-PB_data_is_pressed_ASM:
+PB_data_is_pressed_ASM: //passed a PB in R0
 			LDR R1, =PB_DATA	//Load address of pb data
 			LDR R1, [R1]		//Load value at that address
 			AND R2, R1, R0		//Check if a button has been pressed
 			CMP R2, R0			
 			MOVEQ R0, #1		//If a button has been pressed set R0 to 1 (which will be true)
 			MOVNE R0, #0		//If a button has not been pressed set R0 to 0 (which will be false)
-			BX LR				// eturn 
+			BX LR				// return R0
 
+/*These subroutines only access the pushbutton edgecapture register */
 read_PB_edgecap_ASM:
 			LDR R0, =PB_EDGECAP	//Load address of pb edgecap
 			LDR R0, [R0]	//Load value at edge cap
@@ -45,6 +46,7 @@ PB_clear_edgecap_ASM:
 			STR R1, [R2]	//Stores all 1s in the edgecap (resetting it)
 			BX LR
 
+ /*These subroutines only access the pushbutton interrupt mask register*/
 enable_PB_INT_ASM:
 			LDR R2, =PB_INT	//Load address of pb interrupt mask
 			AND R1, R0, #0xF	//Only load bits we want to enable

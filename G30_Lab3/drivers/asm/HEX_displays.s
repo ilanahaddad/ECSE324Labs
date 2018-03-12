@@ -12,31 +12,31 @@ HEX_clear_ASM:
 				MOV R3, #0x00				// HEX value that clears the hex displays 
 				MOV R4, #1					// Used to compare with each bit of the received parameter
 				MOV R6, #0					// Set initial counter value to 0 
-LOOP5:			
+LOOP5:			//this loop is for the HEX_BASE0 to HEX_BASE 3
 				CMP R6, #4					// When reached the 4th display 
 				BEQ LOOP6					// Go to the next loop(6)
-				AND R5, R0, R4				
+				AND R5, R0, R4				//check if R0 (received) is 1 (want to be displayed)
 				CMP R5, #0					//if the bit is not one skip the clear (not a display passed as parameter)
 				BEQ SKIP5
-				STRB R3, [R1]				//Clears the display 
+				STRB R3, [R1]				//Clears the display for HEX requested (from base 0 to 3)
 SKIP5:		
 				ADD R1, R1, #1				// increment address to next hex display 
-				LSL R4, R4, #1				// increment comparor to next binary bit
+				LSL R4, R4, #1				// increment comparator to next binary bit
 				ADD R6, R6, #1				// increment counter 
 				B LOOP5						
-LOOP6:			
+LOOP6:			//this loop is for the HEX_BASE4 to HEX_BASE6
 				CMP R6, #6					// End the program when all the displays have been checked. 
 				BEQ DONE3
 				AND R5 ,R0, R4				// Same process as before
 				CMP R5, #0
 				BEQ SKIP6
-				STRB R3, [R2]
+				STRB R3, [R2]               //Clears the display for HEX requested (from base 4 to 6)
 SKIP6:		
 				LSL R4, R4, #1
 				ADD R2, R2, #1
 				ADD R6, R6, #1
 				B LOOP6
-DONE3:			
+DONE3:			//reach here when all 6 hex bases have been asserted and cleared if requested
 				POP {R4-R12, LR}
 				BX LR						// return 
 
