@@ -1,0 +1,87 @@
+#include <stdio.h>
+
+#include "../../drivers/inc/HEX_displays.h"
+#include "../../drivers/inc/HPS_TIM.h"
+#include "../../drivers/inc/pushbuttons.h"
+
+int main(){
+	//initialize first timer parameters
+    HPS_TIM_config_t hps_tim;
+    hps_tim.tim = TIM0;
+    hps_tim.timeout = 1000000; // 1 second timeout 
+    hps_tim.LD_en = 1;
+    hps_tim.INT_en = 0;
+    hps_tim.enable = 1;
+    HPS_TIM_config_ASM(&hps_tim);
+
+	//initialize second timer parameters
+    HPS_TIM_config_t hps_tim_pb;
+    hps_tim.tim = TIM1;
+    hps_tim.timeout = 5000; // 5 millisecond timeout 
+    hps_tim.LD_en = 1;
+    hps_tim.INT_en = 0;
+    hps_tim.enable = 1;
+    HPS_TIM_config_ASM(&hps_tim_pb);
+
+	int ms = 0; //displayed on HEX1-0
+	int sec = 0; //displayed on HEX3-2
+	int min = 0; //displayed on HEX5-4
+	int timer_start =0;
+
+    while(1){
+		//timer for stopwatch display
+        if (HPS_TIM_read_INT_ASM(TIM0) && timer_start) {
+            HPS_TIM_clear_INT_ASM(TIM0);
+            ms = ms +10; //timer is for 10 milliseconds
+			//ensure ms, sec, and min are within thei ranges:
+			if(ms >= 1000){
+				ms = ms - 1000; 
+				sec++; //increment seconds
+
+				if(sec >= 60){
+					sec = sec - 60;
+					min++; //increment minutes
+					if(min >= 60){
+						min = 0;
+					}
+				}
+			}
+
+			//write times to the appropriate hex displays
+            HEX_write_ASM(HEX0, ((ms % 100) / 10));
+			HEX_write_ASM(HEX1, (ms / 100));
+			HEX_write_ASM(HEX2, (sec % 10));
+			HEX_write_ASM(HEX3, (sec / 10));
+			HEX_write_ASM(HEX4, (min % 10));
+			HEX_write_ASM(HEX5, (min / 10));
+			
+        }
+		//timer to read push buttons
+        if (HPS_TIM_read_INT_ASM(TIM1)) {
+            HPS_TIM_clear_INT_ASM(TIM1);
+            int pb = 0xF & read_PB_data_ASM(); 
+			//button 0 is pressed: start timer
+			if((pb & 1) && (!timer_start)){ //also checks timer_start isnt already 1
+				timer_start =1;
+			}
+			//button 1 is pressed: stop timer
+			else if((pb & 2) && (timer_start)){ //timer must already have started in order to stop it
+				timer_start =0;
+			}
+			//buton 2 is pressed: reset timer and stop it as well
+			else if(pb & 4){
+				ms = 0;	
+				sec = 0;
+				min = 0;
+				timer_start = 0;
+
+				HEX_write_ASM(HEX0 | HEX1 | HEX2 | HEX3 | HEX4 | HEX5, 0);
+			}
+            
+        }
+        
+    }
+
+	return 0;
+}
+
